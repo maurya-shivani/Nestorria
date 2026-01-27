@@ -54,7 +54,7 @@ import client3 from '../assets/client3.jpg'
 import client4 from '../assets/client4.jpg'
 import about from '../assets/about.png'
 import faq from '../assets/faq.png'
-import uploadIcon from '../assets/upload_Icon.png'
+// import uploadIcon from '../assets/upload_Icon.png'
 
 
 // Blogs
