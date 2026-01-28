@@ -126,3 +126,19 @@ export const getAgencyBookings = async (req, res)=>{
         res.json({success:false, message: "Failed to get Agency Bookings"})
     }
 }
+
+
+// Stripe Payemnt POST/Stripe
+export const bookingStripePayment = async (req, res) => {
+    try {
+        const {bookingId} = req.body
+        const booking = await Property.findById(booking.property).populate("agency")
+        const totalPrice = booking.totalPrice
+        const {origin} = req.headers
+
+        const stripeInstance = new stripe
+        
+    } catch (error) {
+        
+    }
+}
