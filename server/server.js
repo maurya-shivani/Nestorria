@@ -10,30 +10,46 @@ import bookingRouter from "./routes/bookingRoute.js"
 import agencyRouter from "./routes/agencyRoute.js"
 import connectCloudinary from "./config/cloudinary.js"
 
-await connectDB() // Establish connection to the mongodb
-await connectCloudinary() //Setup cloudinary for image storage
+// Initialize app
+const app = express()
 
-const app = express() // Create an Express application
-app.use(cors()) // Enable CORS for all routes
-
-app.use(express.json()) //Enables JSOn request body parsing
+// Middleware
+app.use(cors())
+app.use(express.json())
 app.use(clerkMiddleware())
 
-// API to listen clerk webhooks
+// API Routes
 app.use("/api/clerk", clearkWebhooks)
-
-// Defin API Routes
 app.use('/api/user', userRouter)
 app.use('/api/agencies', agencyRouter)
 app.use('/api/properties', propertyRouter)
 app.use('/api/bookings', bookingRouter)
 
-//Route endpoint to check server status
+// Health check
 app.get('/', (req, res)=>{
     res.send('API Successfully Running')
 })
 
-const port = process.env.PORT || 4000 // Use the PORT from environment variables or default to 4000
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`)
-})
+// Initialize connections and start server
+const startServer = async () => {
+    try {
+        await connectDB()
+        await connectCloudinary()
+        
+        const port = process.env.PORT || 4000
+        app.listen(port, () => {
+            console.log(`Server is running at http://localhost:${port}`)
+        })
+    } catch (error) {
+        console.error('Failed to start server:', error)
+        process.exit(1)
+    }
+}
+
+// For Vercel serverless
+export default app
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    startServer()
+}

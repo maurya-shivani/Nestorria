@@ -1,7 +1,6 @@
 import Agency from '../models/Agency.js'
 import Booking from '../models/Booking.js'
 import Property from '../models/Property.js'
-import transporter from '../config/nodemailer.js'
 
 // Internal Helper
 const checkAvailability = async ({checkInDate, checkOutDate, property}) => {
@@ -59,32 +58,9 @@ export const bookingCreate = async (req, res)=>{
             guests: +guests,
             checkInDate,
             checkOutDate,
-            totalPrice,
-            // status: "pending",
-            // paymentMethod: "pending"
+            totalPrice, 
         });
         
-        const mailOptions = {
-            from : process.env.SENDER_EMAIL,   //The email we have used of createing the brevo acc
-            to: req.user.email,
-            subject: 'Property Booking/Sale',
-            html: `
-                <h2>Your Booking Details</h2>
-                <p>Thank you for your booking ! Below are your booking details: </p>
-                <ul>
-                    <li><strong>Booking ID:</strong>${booking._id}</li>
-                    <li><strong>Agency Name:</strong>${propertyData.agency.name}</li>
-                    <li><strong>Location:</strong>${propertyData.address}</li>
-                    <li><strong>Date:</strong>${booking.checkInDate.toDateString()}</li>
-                    <li><strong>Booking Amount:</strong>${process.env.CURRENCY || "$"}${booking.totalPrice} for ${nights} nights</li>
-                </ul>
-                <p>We are excited to welcome you soon.</p>
-                <p>Need to change something? Contact us.</p>
-            `
-        }
-
-        await transporter.sendMail(mailOptions)
-
         res.json({success:true, message: "Booking Created"})
  
     } catch (error) {
@@ -98,7 +74,7 @@ export const bookingCreate = async (req, res)=>{
 export const getUserBookings = async(req, res) =>{
     try {
         const user = req.user._id
-        const bookings = await Booking.find({user}).populate("property agency").sort({createdAt: -1})
+        const bookings = await Booking.find({user}).populate("property agency").sort({createAt: -1})
         res.json({success: true, bookings})
         
     } catch (error) {
@@ -110,12 +86,12 @@ export const getUserBookings = async(req, res) =>{
 export const getAgencyBookings = async (req, res)=>{
     try {
         const user = req.user._id
-        const agency = await Agency.findOne({owner: req.user._id})
+        const agency = await Agency.findOne({owner: req.auth.userId})
         if(!agency){
             return res.json({success: false, message: "No Agency Fount"})
         }
         
-        const bookings = await Booking.find({agency: agency._id}).populate("property agency user").sort({createdAt: -1})
+        const bookings = await Booking.find({agency: agency._id}).populate("property agency user").sort({createAt: -1})
         
         const totalBookings = bookings.length
         const totalRevenue = bookings.reduce((acc, b)=> acc + (b.isPaid ? b.totalPrice : 0), 0)
@@ -124,21 +100,5 @@ export const getAgencyBookings = async (req, res)=>{
         
     } catch (error) {
         res.json({success:false, message: "Failed to get Agency Bookings"})
-    }
-}
-
-
-// Stripe Payemnt POST/Stripe
-export const bookingStripePayment = async (req, res) => {
-    try {
-        const {bookingId} = req.body
-        const booking = await Property.findById(booking.property).populate("agency")
-        const totalPrice = booking.totalPrice
-        const {origin} = req.headers
-
-        const stripeInstance = new stripe
-        
-    } catch (error) {
-        
     }
 }
