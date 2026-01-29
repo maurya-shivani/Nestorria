@@ -30,21 +30,21 @@ app.get('/', (req, res)=>{
     res.send('API Successfully Running')
 })
 
-// Initialize connections and start server
-const startServer = async () => {
-    try {
-        await connectDB()
-        await connectCloudinary()
+// // Initialize connections and start server
+// const startServer = async () => {
+//     try {
+//         await connectDB()
+//         await connectCloudinary()
         
-        const port = process.env.PORT || 4000
-        app.listen(port, () => {
-            console.log(`Server is running at http://localhost:${port}`)
-        })
-    } catch (error) {
-        console.error('Failed to start server:', error)
-        process.exit(1)
-    }
-}
+//         const port = process.env.PORT || 4000
+//         app.listen(port, () => {
+//             console.log(`Server is running at http://localhost:${port}`)
+//         })
+//     } catch (error) {
+//         console.error('Failed to start server:', error)
+//         process.exit(1)
+//     }
+// }
 
 // For Vercel serverless
 export default app
