@@ -2,8 +2,7 @@ import Agency from "../models/Agency.js";
 import Booking from "../models/Booking.js";
 import Property from "../models/Property.js";
 import transporter from "../config/nodemailer.js";
-// import stripe from "stripe";
-import Stripe from "stripe";
+import stripe from "stripe";
 
 // Internal Helper
 const checkAvailability = async ({ checkInDate, checkOutDate, property }) => {
@@ -118,105 +117,5 @@ export const getAgencyBookings = async (req, res) => {
     });
   } catch (error) {
     res.json({ success: false, message: "Failed to get Agency Bookings" });
-  }
-};
-
-// // Stripe Payment POST/stripe
-// export const bookingStripePayment = async (req, res) => {
-
-//   console.log("Booking is called")
-  
-//   // try {
-//   //   const { bookingId } = req.body;
-//   //   const booking = await Booking.findById(bookingId);
-//   //   const propertyData = await Property.findById(booking.property).populate("agency");
-//   //   const totalPrice = booking.totalPrice;
-//   //   const { origin } = req.headers;
-    
-//   //   const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-//   //   const line_items = [
-//   //     {
-//   //       price_data: {
-//   //         currency: "usd",
-//   //         product_data: { name: propertyData.agency.name },
-//   //         unit_amount: totalPrice * 100,
-//   //       },
-//   //       quantity: 1,
-//   //     },
-//   //   ];
-
-//   //   const session = await stripeInstance.checkout.sessions.create({
-//   //     line_items,
-//   //     mode: "payment",
-//   //     // success_url: `https://nestorria-xi.vercel.app/processing/my-bookings`,
-//   //     // cancel_url: `https://nestorria-xi.vercel.app/my-bookings`,
-//   //     success_url: `${origin}/processing/my-bookings`,
-//   //     cancel_url: `${origin}/my-bookings`,
-//   //     metadata: { bookingId },
-//   //   });
-
-//   //   res.json({ success: true, url: session.url });
-//   // } catch (error) {
-//   //   res.json({ success: false, message: "Payment Failed" });
-//   // }
-// };
-
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// Stripe Payment POST /stripe
-export const bookingStripePayment = async (req, res) => {
-  console.log("Booking stripe API called");
-
-  try {
-    const { bookingId } = req.body;
-
-    if (!bookingId) {
-      return res.json({ success: false, message: "Booking ID missing" });
-    }
-
-    const booking = await Booking.findById(bookingId);
-    if (!booking) {
-      return res.json({ success: false, message: "Booking not found" });
-    }
-
-    const propertyData = await Property
-      .findById(booking.property)
-      .populate("agency");
-
-    const totalPrice = booking.totalPrice;
-    const origin = req.headers.origin;
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: propertyData.agency.name,
-            },
-            unit_amount: totalPrice * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${origin}/processing/my-bookings`,
-      cancel_url: `${origin}/my-bookings`,
-      metadata: { bookingId },
-    });
-
-    return res.json({
-      success: true,
-      url: session.url,
-    });
-
-  } catch (error) {
-    console.error("Stripe error:", error);
-    return res.json({
-      success: false,
-      message: error.message,
-    });
   }
 };

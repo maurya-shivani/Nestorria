@@ -24,31 +24,6 @@ const MyBookings = () => {
     }
   };
 
-  // Stripe payment
-const handlePayment = async (bookingId) => {
-  try {
-    const { data } = await axios.post(
-      "/api/bookings/stripe",   // ✅ FULL PATH
-      { bookingId },
-      {
-        headers: {
-          Authorization: `Bearer ${await getToken()}`,
-        },
-      }
-    );
-
-    if (data.success && data.url) {
-      window.location.href = data.url;
-    }
-  } catch (error) {
-    console.error(
-      "Stripe error:",
-      error.response?.data || error.message
-    );
-  }
-};
-
-
   useEffect(() => {
     if (user) {
       getUserBooking();
