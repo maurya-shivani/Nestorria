@@ -23,7 +23,7 @@ export const createNewProperty = async (req, res) => {
     const agency = await Agency.findOne({ owner: req.auth.userId });
 
     if (!agency) {
-      return res.json({ success: false, message: "Agency not fount" });
+      return res.json({ success: false, message: "Agency not found" });
     }
 
     // Upload images to cloudinary

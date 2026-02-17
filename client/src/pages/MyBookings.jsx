@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { assets } from "../assets/data";
+import toast from "react-hot-toast";
 
 const MyBookings = () => {
-  const [bookings, setBookings] = useState();
   const { currency, user, axios, getToken } = useAppContext();
+  const [ bookings, setBookings] = useState();
 
   const getUserBooking = async () => {
     try {
@@ -13,6 +14,7 @@ const MyBookings = () => {
        });
 
       if (data.success) {
+        console.log("Stripe URL:", data.url);
         setBookings(data.bookings)
       } else {
         toast.error(data.message);
@@ -21,6 +23,31 @@ const MyBookings = () => {
       toast.error(error.message);
     }
   };
+
+  // Stripe payment
+const handlePayment = async (bookingId) => {
+  try {
+    const { data } = await axios.post(
+      "/api/bookings/stripe",   // ✅ FULL PATH
+      { bookingId },
+      {
+        headers: {
+          Authorization: `Bearer ${await getToken()}`,
+        },
+      }
+    );
+
+    if (data.success && data.url) {
+      window.location.href = data.url;
+    }
+  } catch (error) {
+    console.error(
+      "Stripe error:",
+      error.response?.data || error.message
+    );
+  }
+};
+
 
   useEffect(() => {
     if (user) {
@@ -82,11 +109,12 @@ const MyBookings = () => {
               <div className="flex items-center gap-x-2">
                 <h5 className="medium-14">Payment:</h5>
                 <div className="flex items-center gap-1">
-                  <span className={`min-w-2.5 h-2.5 rounded-full ${booking.isPaid ? "bg-green-500" : "bg-yellow-500"}`}></span>
+                  <span className={`min-w-2.5 h-2.5 rounded-full ${booking.isPaid ? "bg-green-500" : "bg-yellow-500"}`}/>
+                  <p>{booking.isPaid ? "Paid": "Unpaid"}</p>
                 </div>
               </div>
               {!booking.isPaid && (
-                <button  className="btn-secondary !py-1 !text-xs rounded-sm">Pay Now</button>
+                <button  type="button" onClick={()=> handlePayment(booking._id)}  className="btn-secondary !py-1 !text-xs rounded-sm">Pay Now</button>
               )}
             </div>
           </div>

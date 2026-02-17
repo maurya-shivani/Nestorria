@@ -141,7 +141,7 @@ const Listing = () => {
                     handleFilterChange(e.target.checked, price, "priceRange")
                   }
                 />
-                ${price}
+                ₹{price}
               </label>
             ))}
           </div>
